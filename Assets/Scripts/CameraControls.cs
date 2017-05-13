@@ -3,6 +3,13 @@ using UnityEngine;
 
 public class CameraControls : MonoBehaviour
 {
+    ///We need the following hierarchy:
+    ///Root with the script, at the target
+    ///Child "zoom pivot" that has an offset Y and Z, so that the camera, is at 0,0,0
+    ///Target, child of "zoom pivot" that is where the camera points at
+    ///"Rotation pivot" child of "zoom pivot" that ensures that the camera, has 0 rotation at X (even if the camera is rotated, this moves it forward/sideways/etc as if it wasn't)
+    ///The camera itself, that can be rotated as we want, on the X axis.
+
 
     public const float RotationIncrement = 45f;
     public const float RotationDuration = 1f;
@@ -76,7 +83,7 @@ public class CameraControls : MonoBehaviour
         }
         var targetRotation = transform.localEulerAngles;
         targetRotation.y += sign * RotationIncrement;
-        transform.DORotate(targetRotation, RotationDuration).SetEase(Ease.InOutCirc).OnComplete(() => isRotating = false);
+        transform.DOLocalRotate(targetRotation, RotationDuration).SetEase(Ease.InOutCirc).OnComplete(() => isRotating = false);
     }
 
     private enum Rotation { Clockwise, Anticlockwise };
