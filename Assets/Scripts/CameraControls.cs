@@ -20,8 +20,8 @@ public class CameraControls : MonoBehaviour
     public const int MaxCameraZoomOut = -3;
 
 
-    public Transform target;
-    public Transform camera;
+    public Transform targetTransform;
+    public Transform cameraTransform;
 
     // Update is called once per frame
     void Update()
@@ -63,8 +63,8 @@ public class CameraControls : MonoBehaviour
         }
         isZooming = true;
         CameraZoomLevel += sign;
-        var targetPosition = target.localPosition * 0.25f * CameraZoomLevel;
-        camera.DOLocalMove(targetPosition, ZoomDuration).OnComplete(() => isZooming = false);
+        var targetPosition = targetTransform.localPosition * 0.25f * CameraZoomLevel;
+        cameraTransform.DOLocalMove(targetPosition, ZoomDuration).OnComplete(() => isZooming = false);
     }
 
     private bool isRotating = false;
