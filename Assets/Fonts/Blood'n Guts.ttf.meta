@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: cd34037d5b3d25945ab35d2152d2f100
+timeCreated: 1494541924
+licenseType: Free
+TrueTypeFontImporter:
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: Blood'n Guts
+  fontNames:
+  - Blood'n Guts
+  fallbackFontReferences: []
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
