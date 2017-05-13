@@ -8,6 +8,8 @@ public class GetOutlineReferences : MonoBehaviour
     public List<Outline> OutlineReferences;
 
     Outline[] oldOutlines;
+
+    public bool IsClickable = true;
 #if UNITY_EDITOR
     void Update()
     {
