@@ -1,5 +1,4 @@
-﻿using DG.Tweening;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,6 +8,8 @@ public class MouseManager : MonoBehaviour
     public GameObject highlightedObject;
 
     public GameObject selectedObject;
+
+    public GameObject SelectionSquare;
 
     public event EventHandler<ClickArgs> ClickEvent;
     public event EventHandler<ClickArgs> SelectionEvent;
@@ -45,7 +46,7 @@ public class MouseManager : MonoBehaviour
                 DeselectionEvent.Invoke(this, new ClickArgs(selectedObject));
             }
             //select the object
-            if (SelectionEvent != null)
+            if (SelectionEvent != null && clickedObject != null)
             {
                 SelectionEvent.Invoke(this, new ClickArgs(clickedObject));
             }
@@ -67,11 +68,17 @@ public class MouseManager : MonoBehaviour
         {
             return;
         }
+
+        if (SelectionSquare != null)
+        {
+            SelectionSquare.SetActive(false);
+        }
+
         selectedObject = null;
         var deselectedObject = e.clickedObject;
+
         //we could delegate or do the event handling in the object itself, let's keep it here for now
-        //deselectedObject.transform.DOKill(true);
-        deselectedObject.transform.DOBlendableLocalMoveBy(Vector3.down * 2, 0.5f);//TODO: This might force the object to certain X Y Z, if it's already moving from another source this could interfere
+        //deselectedObject.transform.DOBlendableLocalMoveBy(Vector3.down * 2, 0.5f);//TODO: This might force the object to certain X Y Z, if it's already moving from another source this could interfere
 
         var refs = deselectedObject.GetComponent<GetOutlineReferences>();
         if (refs != null)
@@ -80,6 +87,7 @@ public class MouseManager : MonoBehaviour
             foreach (var outline in outlines)
             {
                 outline.color = 0;
+                outline.enabled = false;
             }
         }
     }
@@ -87,9 +95,38 @@ public class MouseManager : MonoBehaviour
     private void MouseManager_SelectionEventHandler(object sender, ClickArgs e)
     {
         selectedObject = e.clickedObject;
+
+        Vector3 selectionCenter;
+        if (SelectionSquare != null)
+        {
+            SelectionSquare.SetActive(true);
+            selectionCenter = e.clickedObject.transform.position;
+            var renderers = selectedObject.GetComponentsInChildren<Renderer>();
+            if (renderers != null)
+            {
+                Bounds totalBounds = new Bounds();
+                foreach (var renderer in renderers)
+                {
+                    if (totalBounds.extents == Vector3.zero)
+                    {
+                        totalBounds = renderer.bounds;
+                    }
+                    else
+                    {
+                        totalBounds.Encapsulate(renderer.bounds);
+                    }
+                }
+                var x = totalBounds.size;
+                x.y = 1;
+                SelectionSquare.transform.localScale = x;
+                var boundsCenter = totalBounds.center;
+                boundsCenter.y = 0;
+                selectionCenter = boundsCenter;
+            }
+            SelectionSquare.transform.position = selectionCenter;
+        }
         //we could delegate or do the event handling in the object itself, let's keep it here for now
-        //e.clickedObject.transform.DOKill(true);
-        e.clickedObject.transform.DOBlendableLocalMoveBy(Vector3.up * 2, 0.5f);//TODO: This might force the object to certain X Y Z, if it's already moving from another source this could interfere
+        //e.clickedObject.transform.DOBlendableLocalMoveBy(Vector3.up * 2, 0.5f);//TODO: This might force the object to certain X Y Z, if it's already moving from another source this could interfere
 
         var refs = e.clickedObject.GetComponent<GetOutlineReferences>();
         if (refs != null)
@@ -98,6 +135,7 @@ public class MouseManager : MonoBehaviour
             foreach (var outline in outlines)
             {
                 outline.color = 1;
+                outline.enabled = true;
             }
         }
     }
@@ -139,12 +177,20 @@ public class MouseManager : MonoBehaviour
             {
                 //if you hit something, but it's not clickable
                 ClearHighlight();
+                if (Input.GetMouseButtonDown(0) && selectedObject != null)
+                {
+                    ClickEvent.Invoke(this, new ClickArgs(null));
+                }
             }
         }
         else
         {
             //if you did not hit a collider
             ClearHighlight();
+            if (Input.GetMouseButtonDown(0) && selectedObject != null)
+            {
+                DeselectionEvent.Invoke(this, new ClickArgs(selectedObject));
+            }
         }
     }
 
@@ -179,16 +225,20 @@ public class MouseManager : MonoBehaviour
         {
             return;
         }
-        var refs = highlightedObject.GetComponent<GetOutlineReferences>();
-        if (refs == null)
+        if (highlightedObject != selectedObject)
         {
-            return;
-        }
-        var outlinesInChildren = refs.OutlineReferences;
-        //var outlinesInChildren = selectedObject.GetComponentsInChildren<cakeslice.Outline>();
-        foreach (var outline in outlinesInChildren)
-        {
-            outline.enabled = false;
+            //if it's not selected, disable outline
+            var refs = highlightedObject.GetComponent<GetOutlineReferences>();
+            if (refs == null)
+            {
+                return;
+            }
+            var outlinesInChildren = refs.OutlineReferences;
+            //var outlinesInChildren = selectedObject.GetComponentsInChildren<cakeslice.Outline>();
+            foreach (var outline in outlinesInChildren)
+            {
+                outline.enabled = false;
+            }
         }
         highlightedObject = null;
     }
